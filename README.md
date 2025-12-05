@@ -33,6 +33,9 @@ AI does not possess true intelligence. Instead, it excels at memorizing vast tra
 If unit tests are poorly written (for example, if they test the implementation details rather than the business features),refactoring may cause many unit tests to fail. In such cases, developers must determine whether the failures are due to issues introduced by the refactoring or because the unit tests themselves were not written correctly.
 For this reason, adhering to best practices in unit testing is essential.
 
+## Developers as Pilots: AI as Copilot, Not Autopilot
+While AI coding agent instruction files provide valuable guidance for automated test generation, they do not eliminate the need for developer expertise. **Developers must thoroughly understand testing best practices and remain actively engaged in reviewing AI-generated test cases**. Even with well-configured AI agents, human oversight is critical to ensure test quality, catch edge cases that AI might miss, and verify that generated tests align with the application's business logic and requirements. Treating AI as a productivity tool rather than a replacement for developer judgment ensures that test suites remain reliable, maintainable, and effective.
+
 # Unit Test Cases Best Practices
 The Claude AI model was used to research unit-testing best practices, generate example code, and produce the coding-agent instruction document.
 
