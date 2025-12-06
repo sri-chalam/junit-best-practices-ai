@@ -72,3 +72,65 @@ The Claude AI model was used to research unit-testing best practices, generate e
 
 [Example with Self-Validation - Bad Example](examples/follow-FIRST-principles/SelfValidationPrincipleBadExample.java)
 
+## Avoid Testing Implementation Details
+**Summary:** Tests using public APIs are resilient to refactoring and won't break when internal implementation changes.
+This is fundamental to achieving unchanging tests.
+
+### Best Practices
+1. Test the "what" not the "how"
+2. Access the system under test the same way real users would
+3. Avoid testing private methods directly. Let private methods be tested implicitly through public method tests
+4. Test the complete behavior through the public interface
+5. Tests that break during refactoring indicate they weren't written at the appropriate abstraction level
+
+#### Avoid the below (Never Instructions in AI Agents)
+1. Test private methods directly
+2. Use reflection to access private members for testing
+3. Make private methods package-private just for testing
+
+### Code Examples
+
+
+## Name Tests for Behavior, Action, and Expected Result
+**Summary:** Test names are often the first thing visible in failure reports. Clear names communicate both the action and expected outcome, making debugging faster.
+
+### Best Practices
+1. The test method name should have behavior, actions and expected outcomes
+2. Use descriptive names even if verbose
+3. Test names serve as documentation
+4. Makes test failures immediately understandable
+5. Consider starting with "should" to read as a sentence
+
+### Code Examples
+
+
+## Avoid Logic in Tests
+**Summary:** Tests should contain minimal logic; complex test logic indicates the test or production code needs
+refactoring.
+
+### Best Practices
+1. No conditionals (if/else) in test code
+2. No loops in test code
+3. Keep test setup simple
+4. Complex setup indicates design issues
+
+### Code Examples
+
+
+## Use Setup Methods Appropriately (@BeforeEach and @BeforeAll)
+**Summary:** Leverage JUnit's setup annotations to reduce test duplication while maintaining test independence and
+clarity.
+Setup methods help initialize common test dependencies and data, but must be used carefully to avoid hidden
+dependencies and maintain test readability.
+
+### Best Practices
+1. Use @BeforeEach for per-test setup that ensures each test starts with a fresh state
+2. Use @BeforeAll for expensive one-time setup of immutable shared resources
+3. Avoid shared mutable state between tests
+4. Keep setup methods focused and minimal
+5. Document non-obvious setup behavior
+
+### Code Examples
+
+
+
