@@ -27,6 +27,12 @@
 
     5.1. [Github Copilot - Why Not Reference the Instructions in `.github/copilot-instructions.md`?](#51-github-copilot---why-not-reference-the-instructions-in-githubcopilot-instructionsmd)
 
+6. [AI Instruction Files Evolve Over Time](#6-ai-instruction-files-evolve-over-time)
+
+7. [Lessons Learned While Using AI Agent to Generate Instructions file](#7-lessons-learned-while-using-ai-agent-to-generate-instructions-file)
+
+8. [References](#8-references)
+
 
 # 1. Summary
 Generative AI models have demonstrated impressive capabilities in software development tasks. **However, to use AIcoding agents effectively within an organization, it is essential to provide them with detailed, unambiguous instructions and to follow prompt engineering best practices.**
@@ -217,3 +223,22 @@ GitHub Copilot automatically includes the content of `.github/copilot-instructio
 **Recommendation**: Explicitly reference the JUnit instructions file only when needed (as shown in the prompt template above) rather than including it globally in `copilot-instructions.md`.
 
 
+# 6. AI Instruction Files Evolve Over Time
+Consider an AI agent designed to reply to emails automatically. The agent's instructions evolve over time as humans observe its generated responses and identify opportunities for improvement in specific scenarios, leading them to refine the instructions accordingly.
+
+This represents a key distinction between AI agents and traditional workflow code. In a workflow, once all requirements are known and the code is thoroughly written and tested, the work is complete—no changes are necessary unless requirements change.
+
+**Similarly, just as the email agent's instructions adapt over time, the instructions for AI-generated JUnit test case best practices also evolve and improve iteratively.**
+
+# 7. Lessons Learned While Using AI Agent to Generate Instructions file
+
+The code generated has to be reviewed carefully. The AI generates code for one best practice say naming convention, in other best practices generated, it does not use best practices it recommended.
+
+One best practice suggests test only behaviors and not methods. Another best practice gives an example breaking this best practice - uses method names to test.
+
+The DRY pattern - use it or not to use it: When we ask different AI agents about best practices on Unit test cases, some times it may generate contradicting best practices. For example, Claude generated a best practice to use DRY pattern (do not repeat yourself). While this is useful for general coding, for testing an other design pattern argued that in test cases repetition of the code is acceptable. The author felt that code repetition is fine in unit test cases, otherwise, developers may have to look at multiple helper methods to check the logic in the unit test cases. Well, we need to have a balance of not to repeat too much of common code.
+
+# 8. References
+An excellent book on Software Engineering and Engineering Leadership
+
+[Software Engineering at Google: Lessons Learned from Programming Over Time](https://www.amazon.com/Software-Engineering-Google-Lessons-Programming/dp/1492082791)
