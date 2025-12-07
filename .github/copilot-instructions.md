@@ -4,4 +4,4 @@ This repository uses multiple instruction files to maintain consistent developme
 Refer to the files listed below for guidance on coding standards, testing approaches, design patterns, and other development guidelines.
 
 ## Unit Tests
-See `.github/instructions/junit-test-best-practices.instructions.md`.
+Copilot: Always follow the detailed instructions in: `.github/instructions/junit-test-best-practices.instructions.md`.
