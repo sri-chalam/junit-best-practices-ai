@@ -72,6 +72,7 @@ The Claude AI model was used to research unit-testing best practices, generate e
 
 [Example with Self-Validation - Bad Example](examples/follow-FIRST-principles/SelfValidationPrincipleBadExample.java)
 
+
 ## Avoid Testing Implementation Details
 **Summary:** Tests using public APIs are resilient to refactoring and won't break when internal implementation changes.
 This is fundamental to achieving unchanging tests.
@@ -89,6 +90,7 @@ This is fundamental to achieving unchanging tests.
 3. Make private methods package-private just for testing
 
 ### Code Examples
+[Example for avoid testing implementation details](examples/avoid-testing-implementation-details/AvoidTestImplementationExample.java)
 
 
 ## Name Tests for Behavior, Action, and Expected Result
@@ -102,6 +104,7 @@ This is fundamental to achieving unchanging tests.
 5. Consider starting with "should" to read as a sentence
 
 ### Code Examples
+[Example for appropriate names for test methods](examples/name-test-behavior-results/TestNamingConventionExample.java)
 
 
 ## Avoid Logic in Tests
@@ -115,6 +118,7 @@ refactoring.
 4. Complex setup indicates design issues
 
 ### Code Examples
+[Example for Avoiding Logic in Tests](examples/avoid-logic-in-tests/AvoidLogicInTestExample.java)
 
 
 ## Use Setup Methods Appropriately (@BeforeEach and @BeforeAll)
@@ -131,6 +135,8 @@ dependencies and maintain test readability.
 5. Document non-obvious setup behavior
 
 ### Code Examples
+[Example for Setup Methods Before Each Annotation](examples/use-setup-methods/SetupMethodsBeforeEachExample.java)
 
 
+[Example for Setup Methods Before All Annotation](examples/use-setup-methods/SetupMethodsBeforeAllExample.java)
 
