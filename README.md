@@ -215,7 +215,20 @@ While the instruction file can be placed in a local directory such as `~/Library
 
 ## 5.1. Github Copilot - Why Not Reference the Instructions in `.github/copilot-instructions.md`?
 
-GitHub Copilot automatically includes the content of `.github/copilot-instructions.md` with every prompt. While you could reference `junit-test-best-practices.instructions.md` from within `copilot-instructions.md` to make it implicitly available, this approach has significant drawbacks:
+GitHub Copilot automatically includes the content of `.github/copilot-instructions.md` with every prompt. While you could reference `junit-test-best-practices.instructions.md` from within `copilot-instructions.md` to make it implicitly available, this approach has significant drawbacks.
+
+**The following copilot-instructions.md file has drawbacks and not recommended:**
+```
+# Global Development Guidelines for Copilot
+
+This repository uses multiple instruction files to maintain consistent development practices.
+Refer to the files listed below for guidance on coding standards, testing approaches, design patterns, and other development guidelines.
+
+## Unit Tests
+Copilot: Always follow the detailed instructions in: `.github/instructions/junit-test-best-practices.instructions.md`.
+```
+
+The drawbacks of the above approach are:
 
 - **Token consumption**: The JUnit best practices instructions would be sent with every prompt, regardless of whether you're writing tests, consuming unnecessary tokens
 - **Inefficiency**: These detailed instructions are only needed when generating or modifying JUnit test cases, not for general coding tasks
