@@ -1,0 +1,16 @@
+
+# Compiled class files
+*.class
+
+# Package files
+*.jar
+*.zip
+*.tar.gz
+
+.idea
+
+#build folder
+build
+
+# Gradle Template
+.gradle
