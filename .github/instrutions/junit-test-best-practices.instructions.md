@@ -743,3 +743,114 @@ class BadCardPaymentProcessor {
 }
 ```
 
+---
+
+## 8. Test for Expected Exceptions
+**Rationale:** Verify that code throws appropriate exceptions for invalid inputs or error conditions. This ensures proper error handling and validates that your code fails gracefully with meaningful error messages.
+
+**ALWAYS:**
+- Use assertThrows for exception testing
+- Verify exception type and message
+- Test both happy path and error scenarios
+
+**NEVER:**
+- Ignore exception testing for error conditions
+- Use try-catch blocks in tests instead of assertThrows
+- Test only success cases without validating failure scenarios
+
+**Examples of Testing Expected Exceptions**
+```java
+// ✅ GOOD EXAMPLE: Validate exception type and message
+@Test
+void validateCard_ShouldThrowException_WhenNumberIsEmpty() {
+    CreditCardValidator validator = new CreditCardValidator();
+
+    IllegalArgumentException exception = assertThrows(
+        IllegalArgumentException.class,
+        () -> validator.isValid("")
+    );
+
+    assertEquals("Card number cannot be empty", exception.getMessage());
+}
+
+// ❌ BAD EXAMPLE: Using try-catch instead of assertThrows (ANTI-PATTERN)
+@Test
+void validateCard_BadExample_UsingTryCatch() {
+    CreditCardValidator validator = new CreditCardValidator();
+
+    try {
+        validator.isValid("");
+        fail("Expected IllegalArgumentException to be thrown");
+    } catch (IllegalArgumentException e) {
+        assertEquals("Card number cannot be empty", e.getMessage());
+    }
+}
+```
+
+## 9. Keep Tests Independent
+**Rationale:** Tests must not depend on execution order or the results of other tests to ensure reliability. Each test should be completely self-contained and produce consistent results regardless of when or in what order it runs.
+
+**ALWAYS:**
+- Each test should set up its own data
+- Use @BeforeEach for common setup to ensure fresh state
+- Avoid shared mutable state between tests
+- Tests should pass in any order
+
+**NEVER:**
+- Share mutable state across tests
+- Depend on test execution order
+- Leave side effects that affect other tests
+
+**Examples of Keeping Tests Independent**
+```java
+// ✅ GOOD EXAMPLE: Independent tests with fresh setup
+class TransactionProcessorTest {
+    private TransactionProcessor processor;
+    private CreditCard testCard;
+
+    @BeforeEach
+    void setUp() {
+        // Each test gets fresh instances
+        processor = new TransactionProcessor();
+        testCard = new CreditCard("4532015112830366", "12/25", "123");
+    }
+
+    @Test
+    void authorize_ShouldSucceed_ForValidAmount() {
+        BigDecimal result = processor.authorize(testCard, new BigDecimal("50.00"));
+
+        assertEquals(new BigDecimal("50.00"), result);
+    }
+
+    @Test
+    void authorize_ShouldProcess_DifferentAmount() {
+        BigDecimal result = processor.authorize(testCard, new BigDecimal("100.00"));
+
+        assertEquals(new BigDecimal("100.00"), result);
+    }
+}
+
+// ❌ BAD EXAMPLE: Tests sharing mutable state (ANTI-PATTERN)
+class BadTransactionProcessorTest {
+    // BAD: Shared mutable state across tests
+    private static TransactionProcessor sharedProcessor = new TransactionProcessor();
+    private static BigDecimal totalAmount = BigDecimal.ZERO;
+
+    @Test
+    @Order(1) // BAD: Test order matters - red flag!
+    void firstTest_ModifiesSharedState() {
+        totalAmount = totalAmount.add(new BigDecimal("50.00"));
+        assertEquals(new BigDecimal("50.00"), totalAmount);
+    }
+
+    @Test
+    @Order(2) // BAD: Depends on firstTest running first
+    void secondTest_DependsOnFirstTest() {
+        // PROBLEM: Fails if firstTest doesn't run first
+        totalAmount = totalAmount.add(new BigDecimal("100.00"));
+        assertEquals(new BigDecimal("150.00"), totalAmount);
+    }
+}
+```
+
+---

@@ -230,11 +230,32 @@ Fake implementations are preferred over mocks for complex dependencies. However,
 
 
 ### 3.7.2. Code Examples
-[Example for Interface-Based Fake Implementation](examples/fake-vs-mock-interface/FakeImplementationInterfaceExample.java)
+[Example for Interface-Based Fake Implementation](examples/fake-impl-interface/FakeImplementationInterfaceExample.java)
 
 
+## 3.8. Test for Expected Exceptions
+**Summary:** Verify that code throws appropriate exceptions for invalid inputs or error conditions. 
+
+### 3.8.1. Best Practices
+1. Use assertThrows for exception testing
+2. Verify exception type and message
+3. Test both happy path and error scenarios
+
+### 3.8.2. Code Examples
+[Example Expected Exception](examples/expected-exception/ExpectedExceptionExample.java)
 
 
+## 3.9. Keep Tests Independent
+**Summary:** Tests must not depend on execution order or the results of other tests to ensure reliability.
+
+### 3.9.1. Best Practices
+1. Each test should set up its own data
+2. Use @BeforeEach for common setup
+3. Avoid shared mutable state between tests
+4. Tests should pass in any order
+
+### 3.9.2. Code Examples
+[Example Keep Tests Independent](examples/keep-independent/KeepTestsIndependentExample.java)
 
 
 
