@@ -564,3 +564,182 @@ class CreditCardValidatorTest {
     }
 }
 ```
+
+---
+
+## 6. Mock External Dependencies
+**Rationale:** Use mocking frameworks to isolate the unit under test from external systems like AWS (Cloud) Services, databases, APIs, and file systems. This keeps tests fast, reliable, and prevents test failures due to external system issues.
+
+**ALWAYS:**
+- Mock external services only
+  - Message queues/brokers (Kafka, SQS, SNS, etc.)
+  - Cache systems (Redis, Memcached, ElastiCache)
+  - Third-party libraries that make network calls (payment gateways, email services, etc.)
+  - Databases (DynamoDB, Postgres, MySQL, etc.)
+  - Cloud storage services (S3)
+  - File systems
+- Use frameworks like Mockito for Java
+- Keep tests fast and reliable
+- Prevent test failures due to external system issues
+
+**NEVER:**
+- Make real calls to external systems in unit tests
+- Rely on external databases, APIs, or network resources
+- Use real file system operations when mocking is appropriate
+
+**Examples of Mocking External Dependencies**
+```java
+// ✅ GOOD EXAMPLE: Mocking external payment gateway API
+    @Test
+    void chargeCard_ShouldCallGateway_WhenProcessingPayment() {
+        // Arrange
+        PaymentGateway mockGateway = mock(PaymentGateway.class);
+        when(mockGateway.charge(any(), any())).thenReturn(new GatewayResponse("SUCCESS"));
+
+        PaymentService service = new PaymentService(mockGateway);
+        CreditCard card = new CreditCard("4532015112830366", "12/25", "123");
+
+        // Act
+        service.processPayment(card, new BigDecimal("99.99"));
+
+        // Assert
+        verify(mockGateway, times(1)).charge(eq(card), eq(new BigDecimal("99.99")));
+    }
+
+
+// ❌ BAD EXAMPLE: Making real external calls (ANTI-PATTERN)
+@Test
+@Disabled("This test makes real external calls - DO NOT DO THIS")
+void processPayment_BadExample_RealDynamoDBAndS3() {
+    // BAD: Creates real DynamoDB client
+    DynamoDbClient realDynamoDb = DynamoDbClient.builder()
+        .region(Region.US_EAST_1)
+        .build();
+
+    // BAD: Creates real S3 client
+    S3Client realS3 = S3Client.builder()
+        .region(Region.US_EAST_1)
+        .build();
+
+    // BAD: Makes real network calls to AWS services
+    PaymentProcessor processor = new PaymentProcessor(realDynamoDb, realS3);
+
+    CreditCard card = new CreditCard("4532015112830366", "12/26", "123");
+    PaymentRequest request = new PaymentRequest(card, new BigDecimal("99.99"));
+
+    // This test will:
+    // - Be slow (network latency)
+    // - Fail if AWS is down or credentials are invalid
+    // - Cost money (AWS charges for DynamoDB/S3 operations)
+    // - Pollute production/test database with test payment records
+    // - Store unnecessary receipt files in S3
+    processor.processPayment(request);
+}
+```
+
+---
+
+## 7. Use Interface-Based Fake Implementations for Stateful Complex External Dependencies
+**Rationale:** For complex, stateful external service dependencies, prefer fake implementations over mocking frameworks. Fakes provide realistic behavior, are reusable across tests, and result in more maintainable test suites compared to mocks. When an external dependency is indirectly used (not directly injected), fake implementations provide a simpler and more maintainable testing approach.
+
+**ALWAYS:**
+- Prefer interface-based design for testability
+- When refactoring is feasible, prefer fakes over mocks for better maintainability
+- Use dependency injection to allow swapping real implementations with fakes during testing
+- Fakes centralize implementation in one place; mocks scatter configuration across multiple test files
+
+**NEVER:**
+- Use mocking frameworks when production code cannot be changed (use Mockito for standard scenarios, PowerMock only as last resort)
+- Make production code tightly coupled to concrete implementations
+
+**Examples of Interface-Based Fake Implementations**
+```java
+// Interface for S3 storage operations
+interface S3StorageService {
+    boolean storeReceipt(String transactionId, String receiptContent);
+}
+
+// Production code using interface (enables testing with fakes)
+class CardPaymentProcessor {
+    private final S3StorageService s3Service;
+
+    public CardPaymentProcessor(S3StorageService s3Service) {
+        this.s3Service = s3Service;
+    }
+
+    public String processPayment(String cardNumber, double amount) {
+        if (!isValidCard(cardNumber) || amount <= 0) {
+            return null;
+        }
+        String transactionId = "TXN-" + System.currentTimeMillis();
+        String receipt = generateReceipt(transactionId, cardNumber, amount);
+        boolean stored = s3Service.storeReceipt(transactionId, receipt);
+        return stored ? transactionId : null;
+    }
+
+    private boolean isValidCard(String cardNumber) {
+        return cardNumber != null && cardNumber.length() >= 13;
+    }
+
+    private String generateReceipt(String transactionId, String cardNumber, double amount) {
+        String maskedCard = "****-" + cardNumber.substring(cardNumber.length() - 4);
+        return String.format("Transaction: %s\nCard: %s\nAmount: $%.2f",
+                           transactionId, maskedCard, amount);
+    }
+}
+
+// ✅ GOOD EXAMPLE: Fake implementation with in-memory state
+class FakeS3StorageService implements S3StorageService {
+    private final Map<String, String> storage = new HashMap<>();
+
+    @Override
+    public boolean storeReceipt(String transactionId, String receiptContent) {
+        if (transactionId == null || receiptContent == null) {
+            return false;
+        }
+        storage.put(transactionId, receiptContent);
+        return true;
+    }
+
+    public String getReceipt(String transactionId) {
+        return storage.get(transactionId);
+    }
+}
+
+// ✅ GOOD EXAMPLE: Test using fake implementation
+@Test
+void shouldProcessPaymentAndStoreReceiptInS3() {
+    FakeS3StorageService fakeS3 = new FakeS3StorageService();
+    CardPaymentProcessor processor = new CardPaymentProcessor(fakeS3);
+
+    String transactionId = processor.processPayment("4532123456789010", 99.99);
+
+    assertNotNull(transactionId);
+    String receipt = fakeS3.getReceipt(transactionId);
+    assertTrue(receipt.contains(transactionId));
+    assertTrue(receipt.contains("$99.99"));
+}
+
+// ❌ BAD EXAMPLE: Tightly coupled to AWS SDK (ANTI-PATTERN)
+class BadCardPaymentProcessor {
+    public String processPayment(String cardNumber, double amount) {
+        // BAD: Direct dependency on AWS S3 client - hard to test
+        S3Client s3Client = S3Client.builder()
+            .region(Region.US_EAST_1)
+            .build();
+
+        String transactionId = "TXN-" + System.currentTimeMillis();
+        String receipt = generateReceipt(transactionId, cardNumber, amount);
+
+        // BAD: Direct S3 call - requires mocking framework or real AWS access
+        s3Client.putObject(PutObjectRequest.builder()
+            .bucket("receipts")
+            .key(transactionId)
+            .build(),
+            RequestBody.fromString(receipt));
+
+        return transactionId;
+    }
+}
+```
+

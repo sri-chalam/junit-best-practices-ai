@@ -174,6 +174,69 @@ dependencies and maintain test readability.
 
 [Example for Setup Methods Before All Annotation](examples/use-setup-methods/SetupMethodsBeforeAllExample.java)
 
+## 3.6. Mock External Dependencies
+**Summary:** Use mocking frameworks to isolate the unit under test from external systems like AWS (Cloud) Services, databases, APIs, and file systems.
+
+### 3.6.1. Best Practices
+1. Mock external services only
+
+   1.1. Message queues/brokers - Examples: Kafka, SQS, SNS, etc.
+
+   1.2. Cache systems - Examples: Redis, Memcached, ElastiCache
+
+   1.3. Third-party libraries that make network calls - Examples: payment gateways, email services, etc.
+
+   1.4. Databases - Examples: DynamoDB, Postgres, MySQL, etc.
+
+   1.5. Cloud storage services - Examples: S3
+
+   1.6. File systems
+2. Use frameworks like Mockito for Java
+3. Keeps tests fast and reliable
+4. Prevents test failures due to external system issues
+
+### 3.6.2. Code Examples
+[Example for Mock External Dependencies](examples/mock-external-dependencies/MockExternalDependenciesExample.java)
+
+## 3.7. Use Interface-Based Fake Implementations for Stateful Complex External Dependencies
+**Summary:** For complex, stateful external service dependencies, prefer fake implementations over mocking frameworks. Fakes provide realistic behavior, are reusable across tests, and result in more maintainable test suites compared to mocks.
+
+When an external dependency is indirectly used (i.e., not directly injected into the class under test), mocking becomes more challenging. In such cases, interface-based fake implementations provide a simpler and more maintainable testing approach.
+
+Fake implementations are preferred over mocks for complex dependencies. However, fakes require production code to use interface-based design and dependency injection rather than direct method calls. If refactoring production code is feasible, use fakes; otherwise, fall back to mocking frameworks.
+
+### 3.7.1. Best Practices
+
+1. Always prefer interface-based design for testability
+2. When refactoring is feasible, prefer fakes over mocks for better maintainability
+3. When production code cannot be changed, use Mockito (or PowerMock as last resort)
+4. Fakes centralize implementation in one place; mocks scatter configuration across multiple test files
+
+#### 3.7.1.1. Fake Implementation Guidelines
+1. **Always prefer interface-based design for testability**
+   - Design production code with interfaces from the start to enable fake implementations
+   - Use dependency injection to allow swapping real implementations with fakes during testing
+   - This approach leads to more maintainable and robust tests
+
+2. **When refactoring production code is feasible, prefer fakes over mocks**
+   - If you can refactor production code to use interfaces and dependency injection, fake implementations are strongly preferred
+   - Fakes are more maintainable during refactoring since you only update one fake class instead of scattered mock configurations across multiple tests
+   - Fakes don't require mocking frameworks and provide realistic behavior
+
+3. **When production code cannot be changed, use mocking frameworks**
+   - Use Mockito for standard mocking scenarios (interfaces, regular classes)
+   - Use PowerMock only as a last resort for legacy code with static methods, final classes, or private methods that cannot be refactored
+   - Note: PowerMock should be viewed as a temporary solution while working toward refactoring the code for better testability
+
+
+### 3.7.2. Code Examples
+[Example for Interface-Based Fake Implementation](examples/fake-vs-mock-interface/FakeImplementationInterfaceExample.java)
+
+
+
+
+
+
 
 # 4. Java Junit Coding Agent Instruction File
 The markdown file below contains instructions for a coding agent to generate JUnit tests. These instructions are derived from the best practices in the previous section using Claude.
