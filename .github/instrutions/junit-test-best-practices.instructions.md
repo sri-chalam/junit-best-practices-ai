@@ -938,3 +938,100 @@ void processTransaction_MixedStructure() {
 ```
 
 ---
+
+## 11. Write Descriptive Failure Messages
+**Rationale:** When a test fails, the error message should immediately indicate what was expected versus what actually happened, without needing to debug. Clear failure messages save significant debugging time by providing context about the failure directly in the test output.
+
+**ALWAYS:**
+- Use assertion messages that describe what went wrong in business terms
+- Include expected vs actual values with meaningful context
+- Use AssertJ's `.as()` method or JUnit's message parameter to add descriptions
+- Include relevant object state in failure messages when helpful
+- Make failure messages readable by non-developers when possible
+
+**NEVER:**
+- Rely on default assertion messages like "expected: <true> but was: <false>"
+- Write generic messages that don't explain the business context
+- Omit important context that would help diagnose the failure
+
+**Examples of Writing Descriptive Failure Messages**
+```java
+// ❌ BAD EXAMPLE: Unclear failure message - only shows true/false (ANTI-PATTERN)
+@Test
+void processPayment_insufficientFunds_unclearMessage() {
+    // Given
+    DebitCard card = new DebitCard("6011123456789012", new BigDecimal("25.00"));
+    PaymentProcessor processor = new PaymentProcessor();
+
+    // When
+    PaymentResult result = processor.processPayment(card, new BigDecimal("100.00"));
+
+    // Then
+    // BAD: Failure message would be: "expected: <true> but was: <false>"
+    assertEquals(false, result.isApproved());
+}
+
+// ✅ GOOD EXAMPLE: Clear failure message showing expected vs actual
+@Test
+void processPayment_insufficientFunds_clearMessage() {
+    // Given
+    DebitCard card = new DebitCard("6011123456789012", new BigDecimal("25.00"));
+    PaymentProcessor processor = new PaymentProcessor();
+
+    // When
+    PaymentResult result = processor.processPayment(card, new BigDecimal("100.00"));
+
+    // Then
+    // GOOD: Failure message: "Expected payment to be DECLINED, but got status APPROVED with reason 'INSUFFICIENT_FUNDS'"
+    assertThat(result.getStatus())
+        .as("Expected payment to be DECLINED, but got status %s with reason '%s'",
+            result.getStatus(), result.getDeclineReason())
+        .isEqualTo(PaymentStatus.DECLINED);
+
+    assertThat(result.getDeclineReason())
+        .as("Insufficient funds for transaction")
+        .isEqualTo("INSUFFICIENT_FUNDS");
+}
+
+// ❌ BAD EXAMPLE: Generic assertion with no context (ANTI-PATTERN)
+@Test
+void validateCard_blockedCard_unclearMessage() {
+    // Given
+    CreditCard card = new CreditCard("4532123456789012", "12/25", "123");
+    card.setStatus(CardStatus.BLOCKED);
+    card.setBlockedReason("FRAUD_SUSPECTED");
+    CardValidator validator = new CardValidator();
+
+    // When
+    ValidationResult result = validator.validate(card);
+
+    // Then
+    // BAD: Failure message would be: "expected: <ACTIVE> but was: <BLOCKED>"
+    assertEquals(CardStatus.ACTIVE, card.getStatus());
+}
+
+// ✅ GOOD EXAMPLE: Descriptive message with object context
+@Test
+void validateCard_blockedCard_clearMessage() {
+    // Given
+    CreditCard card = new CreditCard("4532123456789012", "12/25", "123");
+    card.setStatus(CardStatus.BLOCKED);
+    card.setBlockedReason("FRAUD_SUSPECTED");
+    CardValidator validator = new CardValidator();
+
+    // When
+    ValidationResult result = validator.validate(card);
+
+    // Then
+    // GOOD: Failure message includes full context:
+    // "Expected card state ACTIVE, but got card <{number: '****9012', state: 'BLOCKED', blockedReason: 'FRAUD_SUSPECTED'}>"
+    assertThat(card.getStatus())
+        .as("Expected card state ACTIVE, but got card <{number: '%s', state: '%s', blockedReason: '%s'}>",
+            card.getMaskedNumber(), card.getStatus(), card.getBlockedReason())
+        .isEqualTo(CardStatus.ACTIVE);
+}
+```
+
+---
+
+
