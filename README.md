@@ -31,6 +31,9 @@
 
    3.10. [Organize Tests Using Given-When-Then Struture](#310-organize-tests-using-given-when-then-struture)
 
+   3.11. [Write Descriptive Failure Messages](#311-write-descriptive-failure-messages)
+
+
 
 4. [Java Junit Coding Agent Instruction File](#4-java-junit-coding-agent-instruction-file)
 
@@ -142,13 +145,13 @@ This is fundamental to achieving unchanging tests.
 
 ## 3.3. Name Tests for Behavior, Action, and Expected Result
 **Summary:** Test names are often the first thing visible in failure reports. Clear names communicate both the action and expected outcome, making debugging faster.
+Name tests using the pattern: **behaviorUnderTest_stateOrCondition_expectedBehavior**. For example: **getUserById_userNotFound_throwsNotFoundException**. The name should tell you exactly what scenario is being tested and what should happen.
 
 ### 3.3.1. Best Practices
 1. The test method name should have behavior, actions and expected outcomes
 2. Use descriptive names even if verbose
 3. Test names serve as documentation
 4. Makes test failures immediately understandable
-5. Consider starting with "should" to read as a sentence
 
 ### 3.3.2. Code Examples
 [Example for appropriate names for test methods](examples/name-test-behavior-results/TestNamingConventionExample.java)
@@ -282,6 +285,18 @@ Fake implementations are preferred over mocks for complex dependencies. However,
 [Organize using Given-When-Then Structure - Good Example](examples/organize-using-given-when-then/GivenWhenThenGoodExample.java
 
 [Organize using Given-When-Then Structure - Bad Example](examples/organize-using-given-when-then/GivenWhenThenBadExample.java
+
+## 3.11. Write Descriptive Failure Messages
+**Summary:** When a test fails, the error message should immediately indicate what was expected versus what actually happened, without needing to debug.
+
+### 3.11.1. Best Practices
+1. **Use easily understandable failure messages** - Error messages should clearly communicate what went wrong. Examples:
+   - Simple message: "Insufficient funds for transaction"
+   - Expected vs actual: "Expected payment to be APPROVED, but got status DECLINED with reason 'INSUFFICIENT_FUNDS'"
+   - With object context: "Expected card state ACTIVE, but got card <{number: '****5678', state: 'BLOCKED', blockedReason: 'FRAUD_SUSPECTED'}>"
+
+### 3.11.2. Code Examples
+[Example Descriptive Failure Messages](examples/descriptive-failure-messages/DescriptiveFailureMessagesExample.java
 
 
 # 4. Java Junit Coding Agent Instruction File
