@@ -29,6 +29,9 @@
 
    3.9. [Keep Tests Independent](#39-keep-tests-independent)
 
+   3.10. [Organize Tests Using Given-When-Then Struture](#310-organize-tests-using-given-when-then-struture)
+
+
 4. [Java Junit Coding Agent Instruction File](#4-java-junit-coding-agent-instruction-file)
 
 5. [How to Apply the Instruction File?](#5-how-to-apply-the-instruction-file)
@@ -120,11 +123,13 @@ The Claude AI model was used to research unit-testing best practices, generate e
 This is fundamental to achieving unchanging tests.
 
 ### 3.2.1. Best Practices
-1. Test the "what" not the "how"
-2. Access the system under test the same way real users would
-3. Avoid testing private methods directly. Let private methods be tested implicitly through public method tests
-4. Test the complete behavior through the public interface
-5. Tests that break during refactoring indicate they weren't written at the appropriate abstraction level
+1. **Test observable behavior through public APIs, not implementation details** - When refactoring internal logic, well-written tests should remain stable because they verify outcomes rather than how those outcomes are achieved.
+2. Access the system under test the same way real users would.
+3. **Focus on what the code does, not how it does it** - Tests should verify inputs, outputs, and side effects visible to consumers of the code. Avoid asserting on intermediate states, private method calls.
+4. Avoid testing private methods directly. Let private methods be tested implicitly through public method tests.
+5. Test the complete behavior through the public interface
+6. **Ensure tests remain stable during refactoring**: Tests that break during refactoring indicate they weren't written at the appropriate abstraction level.
+7. **Treat tests as specifications of required behavior** - Tests document what the system must do, forming a contract that persists across refactorings.
 
 #### 3.2.1.1. Avoid the below (Never Instructions in AI Agents)
 1. Test private methods directly
@@ -265,6 +270,18 @@ Fake implementations are preferred over mocks for complex dependencies. However,
 ### 3.9.2. Code Examples
 [Example Keep Tests Independent](examples/keep-independent/KeepTestsIndependentExample.java)
 
+## 3.10. Organize Tests Using Given-When-Then Struture
+**Summary:** Organize every test into three clear sections: Given (setup), When (action), Then (verification). This makes tests self-documenting and easy to understand at a glance.
+
+### 3.10.1. Best Practices
+1. **Organize tests into three clear sections to enhance readability** - The Given section establishes preconditions and initial state, the When section executes the behavior being tested, and the Then section verifies expected outcomes. 
+2. **Place Given setup in test methods rather than hiding in @BeforeEach when behavior-specific** - While shared setup can use @BeforeEach, behavior-specific preconditions should be visible in the test method's Given section. This keeps the complete test scenario readable without forcing developers to look elsewhere for context.
+3. **Use multiple When-Then pairs for multi-step validations** - When testing sequential operations where each step has specific expectations, repeat When-Then sections rather than combining all actions and assertions.
+
+### 3.10.2. Code Examples
+[Organize using Given-When-Then Structure - Good Example](examples/organize-using-given-when-then/GivenWhenThenGoodExample.java
+
+[Organize using Given-When-Then Structure - Bad Example](examples/organize-using-given-when-then/GivenWhenThenBadExample.java
 
 
 # 4. Java Junit Coding Agent Instruction File

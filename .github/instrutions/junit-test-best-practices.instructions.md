@@ -15,6 +15,9 @@ Write tests that are:
 - **Isolated**: Test one behavior at a time
 - **Maintainable**: Only change when requirements change, not during refactoring
 - **Clear**: Easy to understand and debug
+- **Treat tests as specifications of required behavior** - Tests document what the system must do, forming a contract that persists across refactorings.
+- **Test observable behavior through public APIs, not implementation details** - When refactoring internal logic, well-written tests should remain stable because they verify outcomes rather than how those outcomes are achieved.
+- **Write tests that validate a specific behavior or outcome, not just exercise a method.** Each test should represent one complete scenario with a clear expected result.
 
 ---
 
@@ -29,6 +32,7 @@ Write tests that are:
 - Test framework behavior (e.g., Spring's dependency injection)
 - Test auto-generated code
 - Use conditionals, loops, or complex expressions in tests
+- Test method call sequences unless absolutely necessary for the specific scenario. Only verify interactions when the "how" matters
 
 ---
 
@@ -786,6 +790,7 @@ void validateCard_BadExample_UsingTryCatch() {
     }
 }
 ```
+---
 
 ## 9. Keep Tests Independent
 **Rationale:** Tests must not depend on execution order or the results of other tests to ensure reliability. Each test should be completely self-contained and produce consistent results regardless of when or in what order it runs.
@@ -850,6 +855,85 @@ class BadTransactionProcessorTest {
         totalAmount = totalAmount.add(new BigDecimal("100.00"));
         assertEquals(new BigDecimal("150.00"), totalAmount);
     }
+}
+```
+---
+
+## 10. Organize Tests Using Given-When-Then Structure
+**Rationale:** Organize every test into three clear sections: Given (setup), When (action), Then (verification). This makes tests self-documenting and easy to understand at a glance. The Given-When-Then pattern provides a consistent structure that improves test readability and maintainability.
+
+**ALWAYS:**
+- Organize tests into three clear sections to enhance readability
+  - **Given**: Establish preconditions and initial state
+  - **When**: Execute the behavior being tested
+  - **Then**: Verify expected outcomes
+- Place Given setup in test methods rather than hiding in @BeforeEach when behavior-specific
+- Use multiple When-Then pairs for multi-step validations when testing sequential operations
+- Keep each section clearly separated with comments or blank lines
+- Test one behavior per test method
+
+**NEVER:**
+- Mix setup, action, and verification without clear separation
+- Test multiple unrelated behaviors in a single test method
+- Hide behavior-specific setup in @BeforeEach when it should be visible in the test
+
+**Examples of Given-When-Then Structure**
+```java
+// ✅ GOOD EXAMPLE: Clear Given-When-Then structure for single behavior
+@Test
+public void shouldApproveTransactionWhenCardHasSufficientBalance() {
+    // Given - Setup preconditions and initial state
+    CreditCard card = new CreditCard("4532-1111-2222-3333", LocalDate.of(2027, 12, 31));
+    card.setAvailableCredit(new BigDecimal("5000.00"));
+    CardProcessor processor = new CardProcessor();
+    BigDecimal purchaseAmount = new BigDecimal("100.00");
+
+    // When - Execute the behavior being tested
+    TransactionResult result = processor.processTransaction(card, purchaseAmount);
+
+    // Then - Verify expected outcomes
+    assertTrue(result.isApproved());
+    assertEquals("APPROVED", result.getStatus());
+    assertEquals(new BigDecimal("4900.00"), card.getAvailableCredit());
+}
+
+
+// ❌ BAD EXAMPLE: No clear Given-When-Then structure, testing multiple behaviors (ANTI-PATTERN)
+@Test
+void testCardProcessing() {
+    // Bad: No clear Given-When-Then structure
+    // Bad: Testing multiple unrelated behaviors in one test
+    CreditCard card = new CreditCard("4532-1111-2222-3333", LocalDate.of(2027, 12, 31));
+    card.setAvailableCredit(new BigDecimal("5000.00"));
+    CardProcessor processor = new CardProcessor();
+
+    // Behavior 1: Sufficient balance
+    TransactionResult result1 = processor.processTransaction(card, new BigDecimal("100.00"));
+    assertTrue(result1.isApproved());
+
+    // Behavior 2: Insufficient funds (unrelated to behavior 1)
+    TransactionResult result2 = processor.processTransaction(card, new BigDecimal("10000.00"));
+    assertFalse(result2.isApproved());
+
+    // Behavior 3: Expired card (unrelated to behaviors 1 and 2)
+    card.setExpirationDate(LocalDate.of(2023, 1, 1));
+    TransactionResult result3 = processor.processTransaction(card, new BigDecimal("50.00"));
+    assertFalse(result3.isApproved());
+}
+
+// ❌ BAD EXAMPLE: Setup and action mixed together (ANTI-PATTERN)
+@Test
+void processTransaction_MixedStructure() {
+    // Bad: No clear separation between Given and When
+    CardProcessor processor = new CardProcessor();
+    TransactionResult result = processor.processTransaction(
+        new CreditCard("4532-1111-2222-3333", LocalDate.of(2027, 12, 31))
+            .setAvailableCredit(new BigDecimal("5000.00")),
+        new BigDecimal("100.00")
+    );
+
+    // Then section present but Given and When are unclear
+    assertTrue(result.isApproved());
 }
 ```
 
