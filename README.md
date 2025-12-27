@@ -21,6 +21,14 @@
 
    3.5. [Use Setup Methods Appropriately (@BeforeEach and @BeforeAll)](#35-use-setup-methods-appropriately-beforeeach-and-beforeall)
 
+   3.6. [Mock External Dependencies](#36-mock-external-dependencies)
+
+   3.7. [Use Interface-Based Fake Implementations for Stateful Complex External Dependencies](#37-use-interface-based-fake-implementations-for-stateful-complex-external-dependencies)
+
+   3.8. [Test for Expected Exceptions](#38-test-for-expected-exceptions)
+
+   3.9. [Keep Tests Independent](#39-keep-tests-independent)
+
 4. [Java Junit Coding Agent Instruction File](#4-java-junit-coding-agent-instruction-file)
 
 5. [How to Apply the Instruction File?](#5-how-to-apply-the-instruction-file)
